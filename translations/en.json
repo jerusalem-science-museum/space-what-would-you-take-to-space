@@ -1,0 +1,28 @@
+{
+  "item1": "Family photo",
+  "item2": "Favorite book",
+  "item3": "Personal diary",
+  "item4": "Smartphone",
+  "item5": "Musical instrument",
+  "item6": "Art supplies",
+  "item7": "Headphones",
+  "item8": "Camera",
+  "item9": "Board games",
+  "item10": "Lucky charm doll",
+  "item11": "Country flag",
+  "item12": "Letter from home",
+  "item13": "Religious items",
+  "selectionPage": "What would you take to space?",
+  "selectObjects": "Select up to 3 items",
+  "rocketQuestion": "[PLACEHOLDER: Fill in the main question text here]",
+  "rocketInstructions": "[PLACEHOLDER: Fill in the instructions text here]",
+  "selected": "Selected",
+  "clearAll": "Clear All",
+  "goToCloud": "Launch!",
+  "backToSelection": "Back to Selection",
+  "wordCloud": "Word Cloud",
+  "loading": "Loading...",
+  "noVotes": "No votes yet. Be the first to vote!",
+  "refresh": "Refresh"
+}
+
