@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en", dir="rtl">
+    <head>
+        <!-- <meta name="viewport"
+            content="width=device-width,
+                    initial-scale=1.0,
+                    maximum-scale=1.0,
+                    user-scalable=no"> -->
+        <title>My Webpage page name</title>
+        <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
+    </head>
+    <body>
+        <div class="page-content">
+            <div class="top-part">
+                <img src="/static/png/rocket no blocks.png" class="rocket">
+                <img src="/static/svg/halo.svg" class="halo">
+                <div class="description">
+                    <h1 class="description-title" data-i18n="title-key">תאכלו מה תאכלו</h1>
+                    <p class="description-subtitle" data-i18n="subtitle-key">מה תקחו איתכם לחלל אה ימצחיקים</p>
+                  </div>
+                <div class="rocket-choices">
+                        <button class="white-block"></button>
+                        <button class="white-block"></button>
+                        <button class="white-block"></button>    
+                </div>
+            </div>
+            <div class="choice-grid-wrapper">
+            <div class="choice-grid borders" id="objects-grid">
+                <button class="purple-block" data-key="item1"></button>
+                <button class="purple-block" data-key="item2"></button>
+                <button class="purple-block" data-key="item3"></button>
+                <button class="purple-block" data-key="item4"></button>
+            
+                <button class="purple-block" data-key="item5"></button>
+                <button class="purple-block" data-key="item6"></button>
+                <button class="purple-block" data-key="item7"></button>
+                <button class="purple-block" data-key="item8"></button>
+            
+                <button class="purple-block" data-key="item9"></button>
+                <button class="purple-block" data-key="item10"></button>
+                <button class="purple-block" data-key="item11"></button>
+                <button class="purple-block" data-key="item12"></button>
+            </div>
+        </div>
+        </div>
+    </body>
+</html>
