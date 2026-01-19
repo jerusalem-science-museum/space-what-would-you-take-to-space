@@ -77,14 +77,15 @@ body {
 .language-choice {
   position: absolute;
   top: 8%;
-  right: 12%;
+  right: 7%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
+  gap: 6%;
   z-index: 4;
   direction: ltr; /* Force LTR layout regardless of page direction */
+  width: 34%;
+  height: 9%;
 }
-
 
 .lang-button {
   background-image: url("../svg/lang\ block.svg");
@@ -93,15 +94,18 @@ body {
   background-position: center;
   background-color: transparent;
   border: none;
-  width: 200%;
-  height: 300%;
+  width: 100%;
+  height: 100%;
   color: black;
   font-family: inherit;
   font-weight: bold;
   cursor: pointer;
   text-align: center;
-  line-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   box-sizing: border-box;
+  font-size: 150%;
 }
 
 .lang-button.selected {
@@ -296,6 +300,22 @@ body {
   justify-content: center;
   padding: 2rem;
   box-sizing: border-box;
+}
+
+/* Top-part inside wordcloud-container should not affect flex layout */
+.wordcloud-container .top-part {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  pointer-events: none; /* Allow clicks to pass through to elements below */
+  z-index: 5;
+}
+
+/* Re-enable pointer events for interactive elements inside */
+.wordcloud-container .top-part .language-choice {
+  pointer-events: auto;
 }
 
 .wordcloud-image-container {

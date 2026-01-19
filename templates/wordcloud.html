@@ -10,10 +10,12 @@
     <div class="main-container">
         <div class="page-content">
             <div class="wordcloud-container">
-                <div class="language-choice">
-                    <button class="lang-button" type="button" data-lang="en">EN</button>
-                    <button class="lang-button" type="button" data-lang="he">HE</button>
-                    <button class="lang-button" type="button" data-lang="ar">AR</button>
+                <div class="top-part">
+                    <div class="language-choice">
+                        <button class="lang-button" type="button" data-lang="en">EN</button>
+                        <button class="lang-button" type="button" data-lang="he">HE</button>
+                        <button class="lang-button" type="button" data-lang="ar">AR</button>
+                    </div>
                 </div>
                 <div class="wordcloud-image-container">
                     <img id="wordcloud-image" src="{{url_for('static', filename='png/wordcloud.png')}}" alt="Word Cloud">
