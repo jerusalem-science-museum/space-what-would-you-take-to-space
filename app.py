@@ -11,6 +11,7 @@ app = Flask(__name__)
 WORDCLOUD_DIR = os.path.join('static', 'wordcloud')
 LANGUAGES = ['en', 'he', 'ar']
 VOTES_FILE = 'votes.json'
+FONTSIZES_FILE = 'fontsizes.json'
 
 @app.route('/')
 def index():
@@ -122,6 +123,30 @@ def regenerate_wordcloud():
     import time
     image_filename = f'wordcloud_{language}.png'
     return jsonify({'image_path': url_for('static', filename=f'wordcloud/{image_filename}') + f'?t={int(time.time())}'})
+
+@app.route('/font-sizes', methods=['GET'])
+def get_font_sizes():
+    """Load font sizes from file"""
+    try:
+        with open(FONTSIZES_FILE, 'r', encoding='utf-8') as f:
+            font_sizes = json.load(f)
+        return jsonify(font_sizes)
+    except FileNotFoundError:
+        return jsonify({})
+
+@app.route('/font-sizes', methods=['POST'])
+def save_font_sizes():
+    """Save font sizes to file"""
+    try:
+        data = request.get_json()
+        font_sizes = data.get('fontSizes', {})
+        
+        with open(FONTSIZES_FILE, 'w', encoding='utf-8') as f:
+            json.dump(font_sizes, f, indent=2, ensure_ascii=False)
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 def get_wordcloud_path(language='en'):
     """Get the path for a language-specific wordcloud file"""
