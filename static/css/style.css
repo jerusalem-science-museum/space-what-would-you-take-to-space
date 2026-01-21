@@ -105,7 +105,7 @@ body {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  font-size: inherit;
+  font-size: 2.5vh; /* Constant font size - text is always EN/HE/AR */
 }
 
 .lang-button.selected {
@@ -475,5 +475,5 @@ body {
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  font-size: 2vh; /* Single font size that scales with viewport */
+  font-size: 3vh; /* Single font size that scales with viewport */
 }

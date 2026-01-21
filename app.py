@@ -4,6 +4,8 @@ from PIL import Image
 from wordcloud import WordCloud
 import json
 import matplotlib.colors
+import shutil
+import tempfile
 
 app = Flask(__name__)
 
@@ -92,11 +94,35 @@ def preview_wordcloud():
         if item_key in temp_votes:
             temp_votes[item_key] += 1
     
-    # Generate wordcloud with temporary votes for all languages
-    # This does NOT modify votes.json file
-    generate_wordcloud_all_languages(temp_votes)
-    
-    return jsonify({'success': True})
+    # Generate wordclouds to temporary files first, then copy to final location
+    # This ensures existing wordclouds aren't overwritten if generation fails
+    temp_files = {}
+    try:
+        # Generate to temporary files
+        for lang in LANGUAGES:
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png', dir=WORDCLOUD_DIR)
+            temp_file.close()
+            temp_files[lang] = temp_file.name
+            generate_wordcloud(temp_votes, language=lang, output_path=temp_file.name)
+        
+        # Only copy to final location if all generations succeeded
+        for lang in LANGUAGES:
+            final_path = get_wordcloud_path(lang)
+            shutil.copy2(temp_files[lang], final_path)
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        # If anything fails, don't overwrite existing wordclouds
+        app.logger.error(f'Error generating preview wordcloud: {e}')
+        return jsonify({'error': str(e)}), 500
+    finally:
+        # Clean up temporary files
+        for temp_path in temp_files.values():
+            try:
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+            except:
+                pass
 
 @app.route('/regenerate-wordcloud', methods=['POST'])
 def regenerate_wordcloud():
