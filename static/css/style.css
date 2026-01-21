@@ -16,8 +16,16 @@
 
 @font-face {
   font-family: "NotoSansArabic";
-  src: url("../fonts/NotoSansArabic.ttf") format("ttf");
+  src: url("../fonts/NotoSansArabic.ttf") format("truetype");
   font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Cairo";
+  src: url("../fonts/Cairo-VariableFont.ttf") format("truetype");
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
@@ -179,6 +187,7 @@ body {
 
 .lang-ar .white-block {
   font-size: 2vh; /* Adjust as needed */
+  font-family: "Cairo", "NotoSansArabic", sans-serif;
 }
 
 .white-block .text-content {
@@ -271,6 +280,7 @@ body {
 
 .lang-ar .launch-button {
   font-size: 3.2vh; /* Adjust as needed */
+  font-family: "Cairo", "NotoSansArabic", sans-serif;
 }
 
 .launch-button:disabled,
@@ -328,6 +338,7 @@ body {
 
 .lang-ar .description-title {
   font-size: 5vh; /* Adjust as needed */
+  font-family: "Cairo", "NotoSansArabic", sans-serif;
 }
 
 /* Language-specific font sizes for description subtitle */
@@ -341,6 +352,7 @@ body {
 
 .lang-ar .description-subtitle {
   font-size: 2.8vh; /* Adjust as needed */
+  font-family: "Cairo", "NotoSansArabic", sans-serif;
 }
 
 .choice-grid {
@@ -399,6 +411,7 @@ body {
 
 .lang-ar .purple-block {
   font-size: 2vh; /* Adjust as needed */
+  font-family: "Cairo", "NotoSansArabic", sans-serif;
 }
 
 .purple-block .text-content {
@@ -500,4 +513,9 @@ body {
   word-wrap: break-word;
   overflow-wrap: break-word;
   font-size: 3vh; /* Single font size that scales with viewport */
+}
+
+/* Language-specific font families for Arabic */
+.lang-ar .back-button {
+  font-family: "Cairo", "NotoSansArabic", sans-serif;
 }
