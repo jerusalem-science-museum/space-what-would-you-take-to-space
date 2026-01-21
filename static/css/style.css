@@ -170,7 +170,7 @@ body {
 
 /* Language-specific font sizes for white blocks */
 .lang-he .white-block {
-  font-size: 2vh; /* Hebrew font size */
+  font-size: 2.6vh; /* Hebrew font size */
 }
 
 .lang-en .white-block {
@@ -367,7 +367,7 @@ body {
 
 /* Language-specific font sizes for purple blocks */
 .lang-he .purple-block {
-  font-size: 2vh; /* Hebrew font size */
+  font-size: 2.6vh; /* Hebrew font size */
 }
 
 .lang-en .purple-block {
