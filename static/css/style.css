@@ -363,6 +363,7 @@ body {
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  color: #8c9eff;
 }
 
 /* Language-specific font sizes for purple blocks */
@@ -390,6 +391,7 @@ body {
 
 .purple-block.selected {
   background-image: url("../svg/purple\ block selected.svg");
+  color: white;
 }
 
 .purple-block.disabled {
