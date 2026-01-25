@@ -316,6 +316,45 @@ async function regenerateWordcloud(language) {
   }
 }
 
+function setLaunchInteractionDisabled(isDisabled) {
+  const selectors = [".purple-block", ".rocket-button", ".lang-button", ".launch-button"];
+  selectors.forEach((selector) => {
+    document.querySelectorAll(selector).forEach((button) => {
+      button.disabled = isDisabled;
+      if (isDisabled) {
+        button.classList.add("disabled");
+      } else {
+        button.classList.remove("disabled");
+      }
+    });
+  });
+}
+
+function playRocketLaunchAnimation() {
+  return new Promise((resolve) => {
+    const rocket = document.querySelector(".rocket");
+    if (!rocket) {
+      resolve();
+      return;
+    }
+
+    const onEnd = () => {
+      rocket.removeEventListener("animationend", onEnd);
+      resolve();
+    };
+
+    rocket.addEventListener("animationend", onEnd, { once: true });
+    rocket.classList.add("launching");
+
+    // Fallback in case animationend doesn't fire
+    setTimeout(() => {
+      if (rocket.classList.contains("launching")) {
+        resolve();
+      }
+    }, 1700);
+  });
+}
+
 async function handleLaunchButtonClick() {
   if (selectedItems.length !== 3) {
     return; // Should not happen if button is properly disabled
@@ -329,6 +368,8 @@ async function handleLaunchButtonClick() {
     // Optionally show loading state
     // launchButton.textContent = "Loading...";
   }
+
+  setLaunchInteractionDisabled(true);
   
   // Collect selected item keys
   const selectedKeys = selectedItems.map(item => item.key);
@@ -337,6 +378,8 @@ async function handleLaunchButtonClick() {
   precomputeWordcloud(selectedKeys).catch(error => {
     console.error('Error generating preview wordcloud:', error);
   });
+
+  await playRocketLaunchAnimation();
   
   try {
     // Submit vote and redirect immediately
@@ -366,6 +409,11 @@ async function handleLaunchButtonClick() {
       launchButton.disabled = false;
       launchButton.classList.remove("disabled");
     }
+    const rocket = document.querySelector(".rocket");
+    if (rocket) {
+      rocket.classList.remove("launching");
+    }
+    setLaunchInteractionDisabled(false);
   }
 }
 
