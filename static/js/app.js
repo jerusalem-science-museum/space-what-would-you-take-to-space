@@ -2,6 +2,12 @@ const translationsCache = {};
 let currentTranslations = {};
 let selectedItems = []; // Array of {gridButton, rocketIndex, key}
 let currentLanguage = localStorage.getItem('selectedLanguage') || "en";
+const DEBUG_MODE = false;
+const RETURN_ANIMATION_MS = 1400;
+const AUTO_RETURN_DELAY_MS = 20000;
+const AUTO_RETURN_ENABLED = true;
+let wordcloudReturnTimer = null;
+let isWordcloudVisible = false;
 
 
 const langDirections = {
@@ -227,28 +233,174 @@ async function setLanguage(lang, shouldRegenerate = true) {
 }
 
 function isWordcloudPage() {
-  return window.location.pathname === '/wordcloud' || 
-         document.querySelector('.wordcloud-container') !== null;
+  return window.location.pathname === '/wordcloud';
+}
+
+function clearReturnTimer() {
+  if (wordcloudReturnTimer) {
+    clearTimeout(wordcloudReturnTimer);
+    wordcloudReturnTimer = null;
+  }
+}
+
+const WORDCLOUD_FADE_MS = 500;
+
+function returnToSelection() {
+  if (!isWordcloudVisible) {
+    return;
+  }
+  clearReturnTimer();
+  isWordcloudVisible = false;
+
+  const selectionContainer = document.querySelector(".selection-container");
+  const wordcloudContainer = document.querySelector(".wordcloud-container");
+  const wordcloudImage = document.getElementById('wordcloud-image');
+  const rocket = document.querySelector(".rocket");
+  const halo = document.querySelector(".halo");
+  const stars = selectionContainer
+    ? selectionContainer.querySelectorAll(".star")
+    : document.querySelectorAll(".star");
+  const description = document.querySelector(".description");
+  const buttonContainer = document.querySelector(".button-container");
+  const languageChoice = selectionContainer
+    ? selectionContainer.querySelector(".language-choice")
+    : document.querySelector(".language-choice");
+  
+  // Step 1: Fade out the wordcloud image
+  if (wordcloudImage) {
+    wordcloudImage.classList.add("fading-out");
+  }
+  
+  // Step 2: After wordcloud fades out, show selection and start animations
+  setTimeout(() => {
+    // Hide wordcloud container
+    if (wordcloudContainer) {
+      wordcloudContainer.classList.add("is-hidden");
+    }
+    if (wordcloudImage) {
+      wordcloudImage.classList.remove("fading-out");
+    }
+    
+    // Ensure description, buttons, and language choice start at opacity 0 before showing container
+    if (description) {
+      description.classList.add("launching");
+    }
+    if (buttonContainer) {
+      buttonContainer.classList.add("launching");
+    }
+    if (languageChoice) {
+      languageChoice.classList.add("launching");
+    }
+    
+    // Show selection container
+    if (selectionContainer) {
+      selectionContainer.classList.remove("is-hidden");
+    }
+
+    // Start rocket/halo/stars return animation
+    if (rocket) {
+      rocket.classList.remove("launching");
+      rocket.classList.add("returning");
+    }
+    if (halo) {
+      halo.classList.remove("launching");
+      halo.classList.add("returning");
+    }
+    if (stars.length) {
+      stars.forEach((star) => {
+        star.classList.remove("launching");
+        star.classList.add("returning");
+      });
+    }
+
+    // Fade in description, buttons, and language choice after a short delay to ensure transition triggers
+    setTimeout(() => {
+      if (description) {
+        description.classList.remove("launching");
+      }
+      if (buttonContainer) {
+        buttonContainer.classList.remove("launching");
+      }
+      if (languageChoice) {
+        languageChoice.classList.remove("launching");
+      }
+    }, 50);
+
+    // Reset selections and re-enable interaction
+    selectedItems = [];
+    updateRocketBlocks();
+    updateGridStates();
+    updateLaunchButtonState();
+    setLaunchInteractionDisabled(false);
+
+    // Clean up returning class after animation completes
+    setTimeout(() => {
+      if (rocket) {
+        rocket.classList.remove("returning");
+      }
+      if (halo) {
+        halo.classList.remove("returning");
+      }
+      if (stars.length) {
+        stars.forEach((star) => star.classList.remove("returning"));
+      }
+    }, RETURN_ANIMATION_MS);
+  }, WORDCLOUD_FADE_MS);
+}
+
+async function showWordcloudView() {
+  const selectionContainer = document.querySelector(".selection-container");
+  const wordcloudContainer = document.querySelector(".wordcloud-container");
+  const wordcloudImage = document.getElementById('wordcloud-image');
+  
+  // Keep wordcloud container hidden and set up image for fade-in
+  if (wordcloudContainer) {
+    wordcloudContainer.classList.add("is-hidden");
+  }
+  if (wordcloudImage) {
+    wordcloudImage.classList.remove("fading-out");
+    wordcloudImage.classList.add("fading-in");
+  }
+  
+  // Load the image while selection container is still visible (but faded out)
+  await loadWordcloudImage(currentLanguage);
+  
+  // Now swap: hide selection, show wordcloud
+  if (selectionContainer) {
+    selectionContainer.classList.add("is-hidden");
+  }
+  if (wordcloudContainer) {
+    wordcloudContainer.classList.remove("is-hidden");
+  }
+  
+  // Fade in the wordcloud image after a short delay
+  setTimeout(() => {
+    if (wordcloudImage) {
+      wordcloudImage.classList.remove("fading-in");
+    }
+  }, 50);
+  
+  isWordcloudVisible = true;
+  clearReturnTimer();
+  if (AUTO_RETURN_ENABLED) {
+    wordcloudReturnTimer = setTimeout(returnToSelection, AUTO_RETURN_DELAY_MS);
+  }
 }
 
 async function precomputeWordcloud(selectedKeys) {
-  try {
-    const response = await fetch('/preview-wordcloud', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-        items: selectedKeys,
-        language: currentLanguage 
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to precompute wordcloud');
-    }
-  } catch (error) {
-    console.error('Error precomputing wordcloud:', error);
+  const response = await fetch('/preview-wordcloud', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ 
+      items: selectedKeys,
+      language: currentLanguage 
+    })
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to precompute wordcloud');
   }
 }
 
@@ -277,19 +429,36 @@ function commitWordcloud() {
   });
 }
 
+function loadWordcloudImage(language) {
+  const wordcloudImage = document.getElementById('wordcloud-image');
+  if (!wordcloudImage) {
+    console.error('Wordcloud image element not found');
+    return Promise.resolve();
+  }
+
+  const path = getWordcloudImagePath(language);
+  const newSrc = path + '?t=' + Date.now();
+
+  return new Promise((resolve, reject) => {
+    const handleLoad = () => {
+      resolve();
+    };
+    const handleError = () => {
+      reject(new Error('Failed to load wordcloud image'));
+    };
+
+    wordcloudImage.addEventListener('load', handleLoad, { once: true });
+    wordcloudImage.addEventListener('error', handleError, { once: true });
+    wordcloudImage.src = newSrc;
+  });
+}
+
 function updateWordcloudImage(language) {
   // Update wordcloud image src to the correct language version
   // Always show the final wordcloud (user never sees preview)
-  const wordcloudImage = document.getElementById('wordcloud-image');
-  if (wordcloudImage) {
-    const path = getWordcloudImagePath(language);
-    // Add cache busting to ensure fresh image
-    const newSrc = path + '?t=' + Date.now();
-    console.log('Updating wordcloud image to:', newSrc);
-    wordcloudImage.src = newSrc;
-  } else {
-    console.error('Wordcloud image element not found');
-  }
+  loadWordcloudImage(language).catch((error) => {
+    console.error('Error updating wordcloud image:', error);
+  });
 }
 
 async function regenerateWordcloud(language) {
@@ -317,7 +486,7 @@ async function regenerateWordcloud(language) {
 }
 
 function setLaunchInteractionDisabled(isDisabled) {
-  const selectors = [".purple-block", ".rocket-button", ".lang-button", ".launch-button"];
+  const selectors = [".purple-block", ".rocket-button", ".launch-button"];
   selectors.forEach((selector) => {
     document.querySelectorAll(selector).forEach((button) => {
       button.disabled = isDisabled;
@@ -332,11 +501,21 @@ function setLaunchInteractionDisabled(isDisabled) {
 
 function playRocketLaunchAnimation() {
   return new Promise((resolve) => {
+    const selectionContainer = document.querySelector(".selection-container");
     const rocket = document.querySelector(".rocket");
     if (!rocket) {
       resolve();
       return;
     }
+    const halo = document.querySelector(".halo");
+    const stars = selectionContainer
+      ? selectionContainer.querySelectorAll(".star")
+      : document.querySelectorAll(".star");
+    const description = document.querySelector(".description");
+    const buttonContainer = document.querySelector(".button-container");
+    const languageChoice = selectionContainer
+      ? selectionContainer.querySelector(".language-choice")
+      : document.querySelector(".language-choice");
 
     const onEnd = () => {
       rocket.removeEventListener("animationend", onEnd);
@@ -345,6 +524,21 @@ function playRocketLaunchAnimation() {
 
     rocket.addEventListener("animationend", onEnd, { once: true });
     rocket.classList.add("launching");
+    if (halo) {
+      halo.classList.add("launching");
+    }
+    if (stars.length) {
+      stars.forEach((star) => star.classList.add("launching"));
+    }
+    if (description) {
+      description.classList.add("launching");
+    }
+    if (buttonContainer) {
+      buttonContainer.classList.add("launching");
+    }
+    if (languageChoice) {
+      languageChoice.classList.add("launching");
+    }
 
     // Fallback in case animationend doesn't fire
     setTimeout(() => {
@@ -374,10 +568,8 @@ async function handleLaunchButtonClick() {
   // Collect selected item keys
   const selectedKeys = selectedItems.map(item => item.key);
   
-  // Start preview wordcloud generation in background (don't wait for it)
-  precomputeWordcloud(selectedKeys).catch(error => {
-    console.error('Error generating preview wordcloud:', error);
-  });
+  // Generate preview wordcloud in background
+  const precomputePromise = precomputeWordcloud(selectedKeys);
 
   await playRocketLaunchAnimation();
   
@@ -395,11 +587,11 @@ async function handleLaunchButtonClick() {
       throw new Error('Failed to submit vote');
     }
     
-    // Redirect immediately - don't wait for wordcloud generation
-    const data = await response.json();
-    if (data.redirect) {
-      window.location.href = data.redirect;
-    }
+    // Wait for wordcloud generation before showing it
+    await precomputePromise;
+    // Stay on the same page and show wordcloud in-place
+    await commitWordcloud();
+    await showWordcloudView();
   } catch (error) {
     console.error('Error submitting vote:', error);
     alert('Failed to submit vote. Please try again.');
@@ -412,6 +604,29 @@ async function handleLaunchButtonClick() {
     const rocket = document.querySelector(".rocket");
     if (rocket) {
       rocket.classList.remove("launching");
+    }
+    const halo = document.querySelector(".halo");
+    if (halo) {
+      halo.classList.remove("launching");
+    }
+    const selectionContainer = document.querySelector(".selection-container");
+    const stars = selectionContainer
+      ? selectionContainer.querySelectorAll(".star")
+      : document.querySelectorAll(".star");
+    if (stars.length) {
+      stars.forEach((star) => star.classList.remove("launching"));
+    }
+    const description = document.querySelector(".description");
+    if (description) {
+      description.classList.remove("launching");
+    }
+    const buttonContainer = document.querySelector(".button-container");
+    if (buttonContainer) {
+      buttonContainer.classList.remove("launching");
+    }
+    const languageChoice = document.querySelector(".language-choice");
+    if (languageChoice) {
+      languageChoice.classList.remove("launching");
     }
     setLaunchInteractionDisabled(false);
   }
@@ -459,7 +674,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const backButton = document.querySelector(".back-button");
   if (backButton) {
     backButton.addEventListener("click", () => {
-      window.location.href = '/';
+      if (isWordcloudPage()) {
+        window.location.href = '/';
+        return;
+      }
+      returnToSelection();
     });
   }
 
@@ -469,10 +688,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // If on wordcloud page, initialize the image with the current language
   if (isWordcloudPage()) {
     updateWordcloudImage(currentLanguage);
-    // Auto-redirect to home after 20 seconds
-    setTimeout(() => {
-      window.location.href = '/';
-    }, 20000);
   }
   
   // If on index page, commit any pending preview wordclouds

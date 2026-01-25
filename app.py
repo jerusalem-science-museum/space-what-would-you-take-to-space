@@ -237,6 +237,7 @@ def generate_wordcloud(votes, language='en', output_path=None):
     margin = 10
     hex_colors = ['#927BEF', '#F15F30', '#F6920F', '#0556E3', '#F4F3E8', '#6D4DEA', "#034679", '#C87FB7','#3A94E7']
     custom_cmap_discrete = matplotlib.colors.ListedColormap(hex_colors, name='custom_discrete')
+    
     wc = WordCloud(
         width=1200,
         height=1200,
