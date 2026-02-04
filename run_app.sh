@@ -18,6 +18,7 @@ chromium \
   --kiosk \
   --password-store=basic \
   --no-sandbox \
+  --disable-pinch \
   --disable-dev-shm-usage \
   --disable-gpu-sandbox \
   --disable-background-timer-throttling \
